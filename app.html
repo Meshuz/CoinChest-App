@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CoinChest — Give · Save · Fun</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,300;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/supabase/2.38.0/supabase.min.js"></script>
+<style>
+:root{
+  --paper:#F6F1E6;--card:#FDFAF2;--ink:#1A1510;--ink-soft:#5A4E3C;--ink-muted:#9C8E78;--line:#E6DACA;--line-strong:#C8BAA4;
+  --live:#C4521E;--live-lt:#F8E4D8;--live-dk:#7A3210;
+  --give:#6B3590;--give-lt:#ECD8F8;--give-dk:#3D1A56;--given:#1D6B52;--given-lt:#C4E8DC;
+  --bel:#1A5FA8;--bel-lt:#D4E8F8;--bel-dk:#0C3563;--growth:#2D9B6A;
+  --r:16px;--rsm:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'Inter',sans-serif;background:var(--paper);color:var(--ink);line-height:1.5;min-height:100vh;}
+h1,h2,h3{font-family:'Fraunces',serif;font-weight:700;letter-spacing:-.02em;}
+.field{border:1px solid var(--line);border-radius:var(--rsm);padding:10px 12px;font-family:'Inter',sans-serif;font-size:14px;background:#fff;color:var(--ink);outline:none;transition:border-color .15s;width:100%;}
+.field:focus{border-color:var(--ink);}
+.field::placeholder{color:var(--ink-muted);}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:999px;font-family:'Inter',sans-serif;font-size:14px;font-weight:700;padding:12px 22px;cursor:pointer;transition:transform .12s ease,opacity .15s;white-space:nowrap;}
+.btn:active{transform:scale(.97);}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+.btn-ink{background:var(--ink);color:#fff;box-shadow:0 4px 0 0 #000;}
+.btn-ink:hover{transform:translateY(-1px);}
+.btn-ghost{background:transparent;color:var(--ink-soft);border:1.5px solid var(--line);}
+.btn-sm{padding:8px 14px;font-size:13px;box-shadow:none;}
+
+#screen-loading{min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;}
+.spinner{width:28px;height:28px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--ink);animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+#screen-onboarding{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+.ob-card{max-width:400px;width:100%;background:var(--card);border:1.5px solid var(--line);border-radius:20px;padding:32px 26px;box-shadow:0 20px 50px rgba(26,21,16,.1);text-align:center;}
+.ob-logo{font-family:'Fraunces',serif;font-weight:700;font-size:22px;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:6px;}
+.ob-logo .dot{width:9px;height:9px;border-radius:50%;background:var(--live);box-shadow:13px 0 0 var(--give),26px 0 0 var(--bel);margin-right:26px;}
+.ob-tag{font-size:13px;color:var(--ink-muted);margin-bottom:26px;}
+.ob-role-row{display:flex;gap:10px;margin-bottom:6px;}
+.ob-role-btn{flex:1;background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:18px 10px;cursor:pointer;transition:border-color .15s,background .15s;}
+.ob-role-btn:hover{border-color:var(--ink);}
+.ob-role-btn .emo{font-size:26px;display:block;margin-bottom:6px;}
+.ob-role-btn .lbl{font-family:'Fraunces',serif;font-weight:600;font-size:14px;}
+.ob-role-btn .sub{font-size:11px;color:var(--ink-muted);margin-top:2px;}
+.ob-panel{margin-top:20px;text-align:left;display:none;}
+.ob-panel.show{display:block;}
+.ob-panel label{font-size:12px;color:var(--ink-muted);font-weight:600;display:block;margin-bottom:5px;}
+.ob-code-display{font-family:'Fraunces',serif;font-size:30px;font-weight:700;letter-spacing:6px;text-align:center;background:var(--bel-lt);color:var(--bel-dk);border-radius:12px;padding:16px 10px;margin:10px 0 14px;}
+.ob-code-input{font-family:'Fraunces',serif;font-size:22px;letter-spacing:6px;text-align:center;text-transform:uppercase;}
+.ob-back{display:block;margin:16px auto 0;background:none;border:none;font-size:12.5px;color:var(--ink-muted);text-decoration:underline;cursor:pointer;}
+.ob-err{color:var(--live-dk);font-size:12.5px;margin-top:8px;display:none;}
+.ob-hint{font-size:12px;color:var(--ink-muted);margin-top:10px;line-height:1.5;}
+
+#app{display:none;min-height:100vh;padding-bottom:60px;}
+.topbar{background:var(--card);border-bottom:1px solid var(--line);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;position:sticky;top:0;z-index:30;}
+.topbar-logo{font-family:'Fraunces',serif;font-weight:700;font-size:17px;display:flex;align-items:center;gap:7px;}
+.topbar-logo .dot{width:7px;height:7px;border-radius:50%;background:var(--live);box-shadow:10px 0 0 var(--give),20px 0 0 var(--bel);margin-right:20px;}
+.role-badge{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;background:var(--ink);color:var(--paper);padding:3px 9px;border-radius:20px;}
+.topbar-right{display:flex;align-items:center;gap:8px;}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--growth);flex:none;}
+.sync-dot.syncing{background:var(--ink-muted);animation:pulse2 1s ease-in-out infinite;}
+.sync-dot.err{background:var(--live);}
+@keyframes pulse2{0%,100%{opacity:1;}50%{opacity:.3;}}
+.icon-btn{background:none;border:1px solid var(--line);border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--ink-soft);}
+
+.main-wrap{max-width:520px;margin:0 auto;padding:0 14px;}
+
+.app-header{text-align:center;padding:18px 16px 12px;}
+.app-header .brand{font-family:'Fraunces',serif;font-size:10px;font-weight:600;letter-spacing:5px;text-transform:uppercase;color:var(--ink-muted);margin-bottom:2px;}
+.app-header h1{font-family:'Fraunces',serif;font-size:26px;font-weight:700;letter-spacing:-.5px;}
+.pills{display:flex;justify-content:center;gap:6px;margin:6px 0 4px;}
+.pill{font-family:'Fraunces',serif;font-size:11px;font-style:italic;padding:3px 10px;border-radius:20px;}
+.pill-l{background:var(--live-lt);color:var(--live-dk);}
+.pill-g{background:var(--give-lt);color:var(--give-dk);}
+.pill-b{background:var(--bel-lt);color:var(--bel-dk);}
+.total-row{margin-top:10px;font-size:13px;color:var(--ink-soft);}
+.total-row strong{font-family:'Fraunces',serif;font-size:20px;color:var(--ink);}
+.child-name-tag{font-size:13px;color:var(--ink-muted);margin-top:2px;}
+
+.income-bar{background:var(--card);border:1px solid var(--line);border-radius:var(--r);margin:0 0 14px;padding:16px;position:relative;overflow:visible;}
+.income-top{display:flex;gap:8px;align-items:center;margin-bottom:6px;}
+.income-top h2{font-family:'Fraunces',serif;font-size:16px;font-weight:600;flex:1;}
+.income-meta{display:flex;gap:7px;margin-bottom:8px;}
+.income-sel{flex:1;min-width:0;font-size:13px;}
+.income-from{flex:1.2;min-width:0;}
+.split-hint{font-size:11.5px;color:var(--ink-muted);text-align:center;margin-top:2px;}
+#ritualStage{position:relative;height:0;overflow:visible;pointer-events:none;}
+.coin{position:absolute;width:22px;height:22px;border-radius:50%;background:var(--ink);color:#fff;font-family:'Fraunces',serif;font-weight:700;font-size:10px;display:flex;align-items:center;justify-content:center;opacity:0;box-shadow:0 4px 10px rgba(0,0,0,.3);z-index:40;}
+.coin.fly{animation:coinFly 1.1s cubic-bezier(.34,1.1,.64,1) forwards;}
+@keyframes coinFly{
+  0%{opacity:1;transform:translate(0,0) scale(1);}
+  70%{opacity:1;}
+  100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.4);}
+}
+.jar-bounce{animation:jarBounce .5s ease;}
+@keyframes jarBounce{0%{transform:scale(1);}30%{transform:scale(1.08);}60%{transform:scale(.97);}100%{transform:scale(1);}}
+
+.jar-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;}
+.jar-col{display:flex;flex-direction:column;}
+.jar-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px 9px 10px;cursor:pointer;transition:border-color .15s;position:relative;overflow:hidden;user-select:none;}
+.jar-card:hover{border-color:var(--line-strong);}
+.jar-card.active{border-color:var(--ink);}
+.jar-accent{position:absolute;top:0;left:0;right:0;height:3px;}
+.j-svg{width:100%;max-width:58px;height:auto;display:block;margin:0 auto 6px;}
+.j-label{font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;text-align:center;margin-bottom:1px;}
+.j-name{font-family:'Fraunces',serif;font-size:12px;font-weight:600;text-align:center;margin-bottom:5px;}
+.j-bal{font-family:'Fraunces',serif;font-size:16px;font-weight:700;text-align:center;line-height:1;}
+.given-badge{display:none;margin-top:5px;background:var(--given-lt);color:var(--given);font-size:9px;font-weight:600;text-align:center;border-radius:5px;padding:2px 5px;}
+.bel-growth{display:none;margin-top:4px;text-align:center;font-size:9px;color:var(--growth);font-weight:600;}
+
+.drawer{display:none;background:var(--card);border:1px solid var(--line);border-top:none;border-radius:0 0 var(--r) var(--r);padding:14px 14px 16px;}
+.drawer.open{display:block;}
+.drawer-title{font-family:'Fraunces',serif;font-size:15px;font-weight:600;margin-bottom:10px;}
+.form-col{display:flex;flex-direction:column;gap:8px;}
+.divider{border-top:1px dashed var(--line);margin:9px 0;}
+.irow{display:flex;gap:8px;align-items:center;}
+.btn-row{display:flex;gap:6px;flex-wrap:wrap;}
+
+.inv-panel{background:var(--bel-lt);border-radius:var(--rsm);padding:11px;margin-bottom:10px;}
+.inv-title{font-family:'Fraunces',serif;font-size:12.5px;font-weight:600;color:var(--bel-dk);margin-bottom:6px;}
+.inv-row{display:flex;justify-content:space-between;font-size:11.5px;color:var(--bel-dk);margin-bottom:3px;}
+.inv-row strong{font-family:'Fraunces',serif;font-size:13.5px;}
+.growth-tag{display:inline-flex;align-items:center;gap:3px;background:var(--growth);color:#fff;border-radius:5px;padding:2px 7px;font-size:10px;font-weight:600;margin-top:3px;}
+.prog-track{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-top:6px;}
+.prog-fill{height:100%;border-radius:3px;transition:width .5s cubic-bezier(.34,1.56,.64,1);}
+.prog-lbl{display:flex;justify-content:space-between;font-size:10.5px;color:var(--ink-muted);margin-top:3px;}
+
+.ch-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;}
+.ch-btn{background:#fff;border:1px solid var(--line);border-radius:var(--rsm);padding:8px 10px;cursor:pointer;text-align:left;transition:border-color .15s;width:100%;}
+.ch-btn:hover{border-color:var(--give);}
+.ch-btn.sel{border-color:var(--give);background:var(--give-lt);}
+.ch-name{font-size:12px;font-weight:600;color:var(--ink);}
+.ch-desc{font-size:10px;color:var(--ink-muted);margin-top:1px;}
+
+.section{margin-bottom:14px;}
+.sec-hd{display:flex;align-items:center;gap:7px;cursor:pointer;margin-bottom:8px;}
+.sec-hd h2{font-family:'Fraunces',serif;font-size:16px;font-weight:600;flex:1;}
+.chevron{font-size:11px;color:var(--ink-muted);transition:transform .2s;}
+.chevron.open{transform:rotate(180deg);}
+.ilog-item{background:var(--card);border:1px solid var(--line);border-radius:var(--rsm);padding:10px 12px;display:flex;align-items:center;gap:10px;margin-bottom:7px;}
+.ilog-icon{font-size:18px;flex-shrink:0;width:26px;text-align:center;}
+.ilog-body{flex:1;min-width:0;}
+.ilog-title{font-size:13px;color:var(--ink);}
+.ilog-date{font-size:11px;color:var(--ink-muted);margin-top:1px;}
+.ilog-amt{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:var(--growth);white-space:nowrap;}
+.empty-note{font-size:12px;color:var(--ink-muted);padding:8px 0;}
+
+.fam-card{background:linear-gradient(135deg,var(--bel-lt),var(--give-lt) 80%);border-radius:var(--r);padding:18px;margin-bottom:16px;text-align:center;}
+.fam-card .lbl{font-size:11.5px;color:var(--ink-soft);font-weight:600;margin-bottom:6px;}
+.fam-code{font-family:'Fraunces',serif;font-size:28px;font-weight:700;letter-spacing:6px;color:var(--ink);}
+.fam-card .hint{font-size:12px;color:var(--ink-soft);margin-top:8px;}
+.fam-card .btn{margin-top:12px;}
+.overview-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;}
+.ov-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px 8px;text-align:center;}
+.ov-card .ov-lbl{font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-muted);}
+.ov-card .ov-val{font-family:'Fraunces',serif;font-size:18px;font-weight:700;margin-top:5px;}
+.set-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.set-item{display:flex;flex-direction:column;gap:3px;}
+.set-lbl{font-size:11px;color:var(--ink-muted);}
+.set-item .field{text-align:center;padding:8px 5px;}
+.ro-val{font-family:'Fraunces',serif;font-size:17px;font-weight:600;color:var(--ink-muted);text-align:center;padding:8px 0;}
+.settings-card,.danger-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:15px;}
+.danger-card{border-color:var(--live-lt);}
+.danger-card .btn-row{margin-top:10px;}
+.tab-row{display:flex;gap:8px;margin:4px 0 16px;}
+.tab-btn{flex:1;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:9px;font-size:13px;font-weight:600;color:var(--ink-soft);cursor:pointer;}
+.tab-btn.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+.tab-view{display:none;}
+.tab-view.active{display:block;}
+
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;display:none;z-index:100;white-space:nowrap;max-width:90vw;text-overflow:ellipsis;overflow:hidden;}
+</style>
+</head>
+<body>
+
+<div id="screen-loading">
+  <div class="spinner"></div>
+  <div style="font-size:13px;color:var(--ink-muted)">Loading CoinChest…</div>
+</div>
+
+<div id="screen-onboarding" style="display:none">
+  <div class="ob-card">
+    <div class="ob-logo"><span class="dot"></span>CoinChest</div>
+    <div class="ob-tag">Give · Save · Fun — the money ritual for kids</div>
+
+    <div id="obChoice">
+      <div class="ob-role-row">
+        <button class="ob-role-btn" onclick="showPanel('parent')">
+          <span class="emo">👪</span>
+          <span class="lbl">I'm a parent</span>
+          <span class="sub">Set up jars & percentages</span>
+        </button>
+        <button class="ob-role-btn" onclick="showPanel('child')">
+          <span class="emo">🧒</span>
+          <span class="lbl">I'm a kid</span>
+          <span class="sub">Split my money</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="ob-panel" id="panelParent">
+      <div id="parentCreateStep">
+        <label>Your family code</label>
+        <div class="ob-code-display" id="newFamCode">——————</div>
+        <div class="ob-hint">Share this code with your child's device so their jars sync with yours. You can find it again anytime from your dashboard.</div>
+        <button class="btn btn-ink" style="width:100%;margin-top:16px" id="createFamBtn" onclick="createFamily()">Create our family →</button>
+        <div style="margin-top:10px;text-align:center">
+          <button class="ob-back" style="margin:0" onclick="switchToJoin('parent')">Already have a code? Join instead</button>
+        </div>
+      </div>
+      <div id="parentJoinStep" style="display:none">
+        <label>Enter family code</label>
+        <input class="field ob-code-input" id="parentJoinCode" maxlength="6" placeholder="ABC123">
+        <button class="btn btn-ink" style="width:100%;margin-top:12px" onclick="joinFamily('parent')">Join family →</button>
+        <div class="ob-err" id="parentJoinErr">Couldn't find that code — check with your family and try again.</div>
+      </div>
+      <button class="ob-back" onclick="backToChoice()">← Back</button>
+    </div>
+
+    <div class="ob-panel" id="panelChild">
+      <label>Ask a parent for the family code</label>
+      <input class="field ob-code-input" id="childJoinCode" maxlength="6" placeholder="ABC123">
+      <button class="btn btn-ink" style="width:100%;margin-top:12px" onclick="joinFamily('child')">Join my jars →</button>
+      <div class="ob-err" id="childJoinErr">Couldn't find that code — ask a parent to check it.</div>
+      <button class="ob-back" onclick="backToChoice()">← Back</button>
+    </div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-logo"><span class="dot"></span>CoinChest <span class="role-badge" id="roleBadge">PARENT</span></div>
+    <div class="topbar-right">
+      <span class="sync-dot" id="syncDot" title="Synced"></span>
+      <button class="icon-btn" onclick="leaveDevice()" title="Switch account">⇄</button>
+    </div>
+  </div>
+
+  <div id="view-child" class="main-wrap" style="display:none">
+    <header class="app-header">
+      <div class="brand">CoinChest</div>
+      <h1>Give · Save · Fun</h1>
+      <div class="pills">
+        <span class="pill pill-g">for others</span>
+        <span class="pill pill-b">the future</span>
+        <span class="pill pill-l">right now</span>
+      </div>
+      <div class="child-name-tag" id="childNameTag"></div>
+      <div class="total-row">Total: <span style="font-size:13px;color:var(--ink-muted)">$</span><strong id="totalDisplay">0</strong></div>
+    </header>
+
+    <div class="income-bar">
+      <div id="ritualStage"></div>
+      <div class="income-top">
+        <h2>Got money?</h2>
+        <input class="field" id="incomeInput" type="number" inputmode="decimal" placeholder="$" style="width:80px">
+        <button class="btn btn-ink" id="incomeBtn" onclick="addIncome()">+ Split</button>
+      </div>
+      <div class="income-meta">
+        <select class="field income-sel" id="incomeSource">
+          <option value="Allowance">💰 Allowance</option>
+          <option value="Gift">🎁 Gift</option>
+          <option value="Chores">🔧 Chores</option>
+          <option value="Holiday">✨ Holiday</option>
+          <option value="Birthday">🎂 Birthday</option>
+          <option value="Other">📝 Other</option>
+        </select>
+        <input class="field income-from" id="incomeFrom" type="text" placeholder="From whom? (optional)">
+      </div>
+      <div class="split-hint" id="splitHint">10% Fun · 10% Give · 80% Save</div>
+    </div>
+
+    <div class="jar-grid" id="jarGrid">
+      <div class="jar-col">
+        <div class="jar-card" id="liveCard" onclick="toggleDrawer('live')">
+          <div class="jar-accent" style="background:var(--live)"></div>
+          <svg class="j-svg" viewBox="0 0 54 72" aria-hidden="true">
+            <defs><clipPath id="cl-l"><rect x="4" y="15" width="46" height="53" rx="8"/></clipPath></defs>
+            <rect x="14" y="2" width="26" height="9" rx="3" fill="var(--ink)" opacity=".75"/>
+            <rect x="19" y="9" width="16" height="5" fill="var(--ink)" opacity=".45"/>
+            <rect x="4" y="15" width="46" height="53" rx="8" fill="var(--live-lt)"/>
+            <g clip-path="url(#cl-l)">
+              <rect id="ll-spent" x="4" y="68" width="46" height="0" fill="var(--live-dk)" opacity=".35" style="transition:y .6s cubic-bezier(.34,1.56,.64,1),height .6s cubic-bezier(.34,1.56,.64,1)"/>
+              <rect id="ll" x="4" y="68" width="46" height="0" fill="var(--live)" style="transition:y .6s cubic-bezier(.34,1.56,.64,1),height .6s cubic-bezier(.34,1.56,.64,1)"/>
+            </g>
+            <rect x="4" y="15" width="46" height="53" rx="8" fill="none" stroke="var(--ink)" stroke-width="1.2" opacity=".6"/>
+            <text id="ll-spent-lbl" x="27" y="64" text-anchor="middle" font-size="7" fill="var(--live-dk)" opacity="0" font-weight="600"></text>
+          </svg>
+          <div class="j-label" style="color:var(--live)">Fun</div>
+          <div class="j-name" style="color:var(--live-dk)">right now</div>
+          <div class="j-bal" style="color:var(--live)" id="liveBal">$0</div>
+        </div>
+        <div class="drawer" id="liveDrawer">
+          <div class="drawer-title">Fun — right now</div>
+          <div class="form-col">
+            <input class="field" id="liveAmt" type="number" inputmode="decimal" placeholder="How much did you spend?">
+            <input class="field" id="liveNote" type="text" placeholder="What for?">
+            <div class="btn-row">
+              <button class="btn btn-sm" style="background:var(--live);color:#fff" onclick="spendLive()">✓ Spent it</button>
+              <button class="btn btn-ghost btn-sm" onclick="closeDrawer('live')">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="jar-col">
+        <div class="jar-card" id="giveCard" onclick="toggleDrawer('give')">
+          <div class="jar-accent" style="background:var(--give)"></div>
+          <svg class="j-svg" viewBox="0 0 54 72" aria-hidden="true">
+            <defs><clipPath id="cl-g"><rect x="4" y="15" width="46" height="53" rx="8"/></clipPath></defs>
+            <rect x="14" y="2" width="26" height="9" rx="3" fill="var(--ink)" opacity=".75"/>
+            <rect x="19" y="9" width="16" height="5" fill="var(--ink)" opacity=".45"/>
+            <rect id="give-bg" x="4" y="15" width="46" height="53" rx="8" fill="var(--give-lt)"/>
+            <g clip-path="url(#cl-g)">
+              <rect id="gl-given" x="4" y="68" width="46" height="0" fill="var(--given)" style="transition:y .6s cubic-bezier(.34,1.56,.64,1),height .6s cubic-bezier(.34,1.56,.64,1)"/>
+              <rect id="gl" x="4" y="68" width="46" height="0" fill="var(--give)" style="transition:y .6s cubic-bezier(.34,1.56,.64,1),height .6s cubic-bezier(.34,1.56,.64,1)"/>
+            </g>
+            <rect x="4" y="15" width="46" height="53" rx="8" fill="none" stroke="var(--ink)" stroke-width="1.2" opacity=".6"/>
+            <text id="gl-given-lbl" x="27" y="64" text-anchor="middle" font-size="7" fill="var(--given)" opacity="0" font-weight="600"></text>
+            <text id="gl-check" x="27" y="46" text-anchor="middle" font-size="14" fill="var(--given)" opacity="0">✓</text>
+          </svg>
+          <div class="j-label" id="giveLbl" style="color:var(--give)">Give</div>
+          <div class="j-name" style="color:var(--give-dk)">for others</div>
+          <div class="j-bal" id="giveBal" style="color:var(--give)">$0</div>
+          <div class="given-badge" id="givenBadge"></div>
+        </div>
+        <div class="drawer" id="giveDrawer">
+          <div class="drawer-title">Give — for others</div>
+          <p style="font-size:11px;color:var(--ink-muted);margin-bottom:8px">Pick a cause — the jar keeps a green memory of what you've given</p>
+          <div class="ch-grid" id="charityGrid"></div>
+          <div class="form-col">
+            <input class="field" id="giveAmt" type="number" inputmode="decimal" placeholder="How much to give?">
+            <div class="btn-row">
+              <button class="btn btn-sm" style="background:var(--give);color:#fff" onclick="doGive()">❤ Donated</button>
+              <button class="btn btn-ghost btn-sm" onclick="closeDrawer('give')">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="jar-col">
+        <div class="jar-card" id="belCard" onclick="toggleDrawer('bel')">
+          <div class="jar-accent" style="background:var(--bel)"></div>
+          <svg class="j-svg" viewBox="0 0 54 72" aria-hidden="true">
+            <defs><clipPath id="cl-b"><rect x="4" y="15" width="46" height="53" rx="8"/></clipPath></defs>
+            <rect x="14" y="2" width="26" height="9" rx="3" fill="var(--ink)" opacity=".75"/>
+            <rect x="19" y="9" width="16" height="5" fill="var(--ink)" opacity=".45"/>
+            <rect x="4" y="15" width="46" height="53" rx="8" fill="var(--bel-lt)"/>
+            <g clip-path="url(#cl-b)"><rect id="bl" x="4" y="68" width="46" height="0" fill="var(--bel)" style="transition:y .6s cubic-bezier(.34,1.56,.64,1),height .6s cubic-bezier(.34,1.56,.64,1)"/></g>
+            <rect x="4" y="15" width="46" height="53" rx="8" fill="none" stroke="var(--ink)" stroke-width="1.2" opacity=".6"/>
+            <circle cx="44" cy="19" r="6" fill="var(--growth)" opacity=".9"/>
+            <text x="44" y="22.5" text-anchor="middle" font-size="8" fill="#fff" font-weight="700">↑</text>
+          </svg>
+          <div class="j-label" style="color:var(--bel)">Save</div>
+          <div class="j-name" style="color:var(--bel-dk)">the future</div>
+          <div class="j-bal" style="color:var(--bel)" id="belBal">$0</div>
+          <div class="bel-growth" id="belGrowth"></div>
+        </div>
+        <div class="drawer" id="belDrawer">
+          <div class="drawer-title">Save — the future</div>
+          <div class="inv-panel" id="invPanel">
+            <div class="inv-title">Growing toward your goal</div>
+            <div class="inv-row"><span>Balance</span><strong id="invBal">$0</strong></div>
+            <div class="inv-row"><span>Annual return</span><strong id="invRate">5%</strong></div>
+            <div class="inv-row"><span>Total earned</span><strong id="invEarned" style="color:var(--growth)">+$0</strong></div>
+            <div class="growth-tag" id="invTag">↑ +$0 this year (est.)</div>
+          </div>
+          <div class="form-col" id="belGoalForm">
+            <input class="field" id="belGoalName" type="text" placeholder="Goal (bike, LEGO set...)">
+            <input class="field" id="belGoalAmt" type="number" inputmode="decimal" placeholder="Goal amount">
+            <div class="btn-row">
+              <button class="btn btn-sm" style="background:var(--bel);color:#fff" onclick="setGoal()">✓ Set goal</button>
+              <button class="btn btn-ghost btn-sm" id="clearGoalBtn" onclick="clearGoal()" style="display:none">Clear goal</button>
+            </div>
+            <div id="belGoalProg" style="display:none">
+              <div class="prog-track"><div class="prog-fill" id="belProgFill" style="background:var(--bel)"></div></div>
+              <div class="prog-lbl"><span id="belProgPct">0%</span><span id="belProgLbl"></span></div>
+            </div>
+            <div class="divider"></div>
+            <input class="field" id="belWAmt" type="number" inputmode="decimal" placeholder="Withdraw — how much?">
+            <input class="field" id="belWNote" type="text" placeholder="What for?">
+            <div class="btn-row">
+              <button class="btn btn-sm" style="background:var(--bel);color:#fff" onclick="doWithdraw()">↓ Withdraw</button>
+              <button class="btn btn-ghost btn-sm" onclick="closeDrawer('bel')">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sec-hd" onclick="toggleSec('incomelog')">
+        <h2>My activity</h2>
+        <span class="chevron" id="incomelogChev">▼</span>
+      </div>
+      <div id="incomelogSec" style="display:none">
+        <div id="incomeLogList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="view-parent" class="main-wrap" style="display:none">
+    <header class="app-header">
+      <div class="brand">CoinChest</div>
+      <h1>Parent dashboard</h1>
+    </header>
+
+    <div class="fam-card">
+      <div class="lbl">Your family code</div>
+      <div class="fam-code" id="famCodeDisplay">——————</div>
+      <div class="hint">Give this to your child's device so their app connects to the same jars.</div>
+      <button class="btn btn-ghost btn-sm" onclick="copyCode()">Copy code</button>
+    </div>
+
+    <div class="tab-row">
+      <button class="tab-btn active" id="tabBtn-overview" onclick="showTab('overview')">Overview</button>
+      <button class="tab-btn" id="tabBtn-settings" onclick="showTab('settings')">Settings</button>
+      <button class="tab-btn" id="tabBtn-activity" onclick="showTab('activity')">Activity</button>
+    </div>
+
+    <div class="tab-view active" id="tab-overview">
+      <div class="overview-grid">
+        <div class="ov-card"><div class="ov-lbl" style="color:var(--live-dk)">Fun</div><div class="ov-val" style="color:var(--live)" id="pLiveBal">$0</div></div>
+        <div class="ov-card"><div class="ov-lbl" style="color:var(--give-dk)">Give</div><div class="ov-val" style="color:var(--give)" id="pGiveBal">$0</div></div>
+        <div class="ov-card"><div class="ov-lbl" style="color:var(--bel-dk)">Save</div><div class="ov-val" style="color:var(--bel)" id="pBelBal">$0</div></div>
+      </div>
+      <div class="settings-card" style="margin-bottom:14px">
+        <div style="font-size:13px;color:var(--ink-soft);margin-bottom:4px">Child</div>
+        <input class="field" id="childName" placeholder="Child's name" oninput="updateChildName()">
+      </div>
+      <div class="settings-card" id="pGoalCard">
+        <div style="font-family:'Fraunces',serif;font-size:14px;font-weight:600;margin-bottom:8px">Save goal</div>
+        <div id="pGoalBody" style="font-size:13px;color:var(--ink-soft)">No goal set yet.</div>
+      </div>
+    </div>
+
+    <div class="tab-view" id="tab-settings">
+      <div class="settings-card" style="margin-bottom:14px">
+        <div style="font-family:'Fraunces',serif;font-size:14px;font-weight:600;margin-bottom:10px">Split percentages</div>
+        <div class="set-grid">
+          <div class="set-item"><span class="set-lbl">% Fun</span><input class="field" id="setLive" type="number" min="0" max="100" value="10" onchange="updateSettings()"></div>
+          <div class="set-item"><span class="set-lbl">% Give</span><input class="field" id="setGive" type="number" min="0" max="100" value="10" onchange="updateSettings()"></div>
+          <div class="set-item"><span class="set-lbl">% Save</span><div class="ro-val" id="setBelDisp">80%</div></div>
+        </div>
+      </div>
+      <div class="settings-card" style="margin-bottom:14px">
+        <div style="font-family:'Fraunces',serif;font-size:14px;font-weight:600;margin-bottom:10px">Save jar annual return</div>
+        <div class="irow">
+          <span style="font-size:12px;color:var(--ink-muted);flex:1">Annual return %</span>
+          <input class="field" id="rateInput" type="number" min="0" max="50" value="5" style="width:70px;text-align:center" onchange="updateRate()">
+        </div>
+      </div>
+      <div class="danger-card">
+        <div style="font-family:'Fraunces',serif;font-size:14px;font-weight:600;margin-bottom:4px">Data</div>
+        <div style="font-size:12px;color:var(--ink-muted)">Export a backup, or reset everything and start over.</div>
+        <div class="btn-row">
+          <button class="btn btn-ghost btn-sm" onclick="exportData()">⬇ Export JSON</button>
+          <button class="btn btn-ghost btn-sm" onclick="resetAll()" style="color:var(--live-dk);border-color:var(--live-lt)">Reset all data</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-view" id="tab-activity">
+      <div id="pActivityList"></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   SUPABASE CLIENT
+============================================================ */
+const SUPABASE_URL='https://nkrdwlnfcfccucosbefk.supabase.co';
+const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5rcmR3bG5mY2ZjY3Vjb3NiZWZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyMTQ5NDMsImV4cCI6MjA5OTc5MDk0M30.lVmEpaIB1yNB-d1fTn4GisT1sUggAe_EqfgnlU9ZHCs';
+let sb=null;
+function getClient(){
+  if(sb) return sb;
+  if(window.supabase && window.supabase.createClient){
+    sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+  }
+  return sb;
+}
+
+/* ============================================================
+   LOCAL (device-only) STORAGE — feature-detected
+   Prefers window.storage (Claude artifact viewer), falls back
+   to localStorage when self-hosted outside Claude.ai
+============================================================ */
+async function localGet(key){
+  if(typeof window.storage!=='undefined'){
+    try{ const r=await window.storage.get(key,false); return r?r.value:null; }catch(e){ return null; }
+  }
+  try{ return localStorage.getItem(key); }catch(e){ return null; }
+}
+async function localSet(key,value){
+  if(typeof window.storage!=='undefined'){
+    try{ return await window.storage.set(key,value,false); }catch(e){ return null; }
+  }
+  try{ localStorage.setItem(key,value); return true; }catch(e){ return null; }
+}
+async function localDelete(key){
+  if(typeof window.storage!=='undefined'){
+    try{ return await window.storage.delete(key,false); }catch(e){ return null; }
+  }
+  try{ localStorage.removeItem(key); return true; }catch(e){ return null; }
+}
+const DEVICE_KEY='coinchest-device';
+
+/* ============================================================
+   FAMILY (shared, cross-device) DATA — via Supabase table `families`
+   columns: code (text, pk), data (jsonb), updated_at (timestamptz)
+============================================================ */
+async function famFetch(code){
+  const client=getClient(); if(!client) return null;
+  const {data,error}=await client.from('families').select('data,updated_at').eq('code',code).maybeSingle();
+  if(error||!data) return null;
+  return data.data;
+}
+async function famInsert(code,stateObj){
+  const client=getClient(); if(!client) return false;
+  const {error}=await client.from('families').insert({code:code,data:stateObj,updated_at:new Date().toISOString()});
+  return !error;
+}
+async function famUpdate(code,stateObj){
+  const client=getClient(); if(!client) return false;
+  const {error}=await client.from('families').update({data:stateObj,updated_at:new Date().toISOString()}).eq('code',code);
+  return !error;
+}
+
+/* ============================================================
+   CONSTANTS & STATE
+============================================================ */
+const CHARITIES=[
+  {id:'food',name:'Food Rescue',desc:'Reducing food waste'},
+  {id:'youth', name:'Youth Outreach',desc:'Support for at-risk teens'},
+  {id:'service',  name:'Community Heroes',desc:'Supporting service members'},
+  {id:'elder',  name:"Elder Care Fund",desc:'Support for seniors'},
+  {id:'edu', name:"Kids' Education Fund",desc:'Community education'},
+  {id:'other',name:'Other',     desc:'Your choice'},
+];
+const SOURCE_ICON={'Allowance':'💰','Gift':'🎁','Chores':'🔧','Holiday':'✨','Birthday':'🎂','Other':'📝'};
+
+const DEF={
+  childName:'',
+  settings:{liveP:10,giveP:10,rate:5},
+  jars:{
+    live:{balance:0,totalSpent:0,history:[]},
+    give:{balance:0,totalGiven:0,lastCharity:'',history:[]},
+    bel: {balance:0,earned:0,goal:{name:'',amount:0},history:[]},
+  },
+  incomeLog:[],
+  updatedAt:0
+};
+
+let S=JSON.parse(JSON.stringify(DEF));
+let ROLE=null;
+let FAMILY_CODE=null;
+let selCharity='';
+let openDrw=null;
+let pollTimer=null;
+let saving=false;
+let realtimeChannel=null;
+
+/* ============================================================
+   UTILS
+============================================================ */
+function fmt(n){return new Intl.NumberFormat('en-US').format(Math.round(n||0));}
+function g(id){return document.getElementById(id);}
+function toast(msg){
+  const t=g('toast');
+  t.textContent=msg;t.style.display='block';
+  clearTimeout(t._t);t._t=setTimeout(()=>t.style.display='none',2600);
+}
+function clr(...ids){ids.forEach(id=>{const e=g(id);if(e)e.value='';});}
+function push(jar,entry){
+  S.jars[jar].history.unshift({id:Date.now()+Math.random(),date:new Date().toISOString(),...entry});
+  S.jars[jar].history=S.jars[jar].history.slice(0,60);
+}
+function genCode(){
+  const chars='ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+  let c='';
+  for(let i=0;i<6;i++) c+=chars[Math.floor(Math.random()*chars.length)];
+  return c;
+}
+function liq(id,bal,ref){
+  const el=g(id);if(!el)return;
+  const top=15,h=53,pct=Math.min(100,ref>0?(bal/ref)*100:0),lh=(h*pct)/100;
+  el.setAttribute('y',top+h-lh);el.setAttribute('height',lh);
+}
+function liqDual(idBal,idSpent,balance,spent,ref){
+  const top=15,h=53;
+  const total=balance+spent;
+  const totalH=Math.min(h,(h*(total/Math.max(ref,1))));
+  const balH=Math.min(h,(h*(balance/Math.max(ref,1))));
+  const spentH=Math.max(0,totalH-balH);
+  const elBal=g(idBal),elSpent=g(idSpent);
+  if(elBal){elBal.setAttribute('y',top+h-balH);elBal.setAttribute('height',balH);}
+  if(elSpent){elSpent.setAttribute('y',top+h-totalH);elSpent.setAttribute('height',spentH);}
+}
+
+/* ============================================================
+   ONBOARDING
+============================================================ */
+function showPanel(role){
+  g('obChoice').style.display='none';
+  g('panelParent').classList.remove('show');
+  g('panelChild').classList.remove('show');
+  if(role==='parent'){
+    g('panelParent').classList.add('show');
+    g('newFamCode').textContent=genCode().split('').join(' ');
+    g('parentCreateStep').style.display='block';
+    g('parentJoinStep').style.display='none';
+  } else {
+    g('panelChild').classList.add('show');
+  }
+}
+function backToChoice(){
+  g('obChoice').style.display='block';
+  g('panelParent').classList.remove('show');
+  g('panelChild').classList.remove('show');
+}
+function switchToJoin(role){
+  g('parentCreateStep').style.display='none';
+  g('parentJoinStep').style.display='block';
+}
+async function createFamily(){
+  const btn=g('createFamBtn'); btn.disabled=true; btn.textContent='Creating…';
+  let code=g('newFamCode').textContent.replace(/\s/g,'');
+  const state=JSON.parse(JSON.stringify(DEF));
+  state.updatedAt=Date.now();
+  let ok=await famInsert(code,state);
+  if(!ok){
+    // extremely unlikely collision — try once more with a fresh code
+    code=genCode();
+    ok=await famInsert(code,state);
+  }
+  if(!ok){
+    btn.disabled=false; btn.textContent='Create our family →';
+    toast('⚠ Could not reach the database — check your connection');
+    return;
+  }
+  await localSet(DEVICE_KEY,JSON.stringify({role:'parent',familyCode:code}));
+  await bootApp('parent',code);
+}
+async function joinFamily(role){
+  const inputId = role==='parent' ? 'parentJoinCode' : 'childJoinCode';
+  const errId = role==='parent' ? 'parentJoinErr' : 'childJoinErr';
+  const code=(g(inputId).value||'').trim().toUpperCase();
+  g(errId).style.display='none';
+  if(code.length<4){ g(errId).style.display='block'; return; }
+  const data=await famFetch(code);
+  if(!data){ g(errId).style.display='block'; return; }
+  await localSet(DEVICE_KEY,JSON.stringify({role,familyCode:code}));
+  await bootApp(role,code);
+}
+async function leaveDevice(){
+  if(!confirm('Switch device role? This device will forget its current family connection (family data stays safe in the database).')) return;
+  await localDelete(DEVICE_KEY);
+  if(pollTimer) clearInterval(pollTimer);
+  if(realtimeChannel && sb) sb.removeChannel(realtimeChannel);
+  location.reload();
+}
+function copyCode(){
+  const code=FAMILY_CODE||'';
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(code).then(()=>toast('✓ Code copied: '+code));
+  } else {
+    toast('Code: '+code);
+  }
+}
+
+/* ============================================================
+   BOOT
+============================================================ */
+async function init(){
+  if(!getClient()){
+    // give the CDN script a moment to load, then retry once
+    await new Promise(r=>setTimeout(r,600));
+  }
+  const raw=await localGet(DEVICE_KEY);
+  if(raw){
+    try{
+      const d=JSON.parse(raw);
+      if(d && d.role && d.familyCode){
+        await bootApp(d.role,d.familyCode);
+        return;
+      }
+    }catch(e){}
+  }
+  g('screen-loading').style.display='none';
+  g('screen-onboarding').style.display='flex';
+}
+
+async function bootApp(role,code){
+  ROLE=role; FAMILY_CODE=code;
+  const data=await famFetch(code);
+  if(data){
+    S=data; if(!S.incomeLog) S.incomeLog=[];
+  } else {
+    S=JSON.parse(JSON.stringify(DEF));
+    await famInsert(code,S);
+  }
+  g('screen-loading').style.display='none';
+  g('screen-onboarding').style.display='none';
+  g('app').style.display='block';
+  g('roleBadge').textContent=role.toUpperCase();
+  g('famCodeDisplay').textContent=code.split('').join(' ');
+  if(role==='child'){
+    g('view-child').style.display='block';
+    g('view-parent').style.display='none';
+  } else {
+    g('view-parent').style.display='block';
+    g('view-child').style.display='none';
+  }
+  applyAll();
+  startRealtime();
+  startPolling();
+}
+
+function startRealtime(){
+  const client=getClient(); if(!client) return;
+  try{
+    realtimeChannel=client.channel('family-'+FAMILY_CODE)
+      .on('postgres_changes',{event:'UPDATE',schema:'public',table:'families',filter:'code=eq.'+FAMILY_CODE},payload=>{
+        const remote=payload.new && payload.new.data;
+        if(remote && (remote.updatedAt||0) > (S.updatedAt||0)){
+          S=remote; if(!S.incomeLog) S.incomeLog=[];
+          applyAll();
+        }
+      })
+      .subscribe();
+  }catch(e){ console.warn('realtime unavailable, relying on polling',e); }
+}
+
+function startPolling(){
+  if(pollTimer) clearInterval(pollTimer);
+  pollTimer=setInterval(pollNow,6000);
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='visible') pollNow();
+  });
+}
+async function pollNow(){
+  if(!FAMILY_CODE||saving) return;
+  const dot=g('syncDot'); if(dot) dot.classList.add('syncing');
+  const remote=await famFetch(FAMILY_CODE);
+  if(dot) dot.classList.remove('syncing');
+  if(!remote) return;
+  if((remote.updatedAt||0) > (S.updatedAt||0)){
+    S=remote; if(!S.incomeLog) S.incomeLog=[];
+    applyAll();
+  }
+}
+
+async function save(){
+  S.updatedAt=Date.now();
+  saving=true;
+  const dot=g('syncDot'); if(dot){ dot.classList.remove('err'); dot.classList.add('syncing'); }
+  const ok=await famUpdate(FAMILY_CODE,S);
+  saving=false;
+  if(dot) dot.classList.remove('syncing');
+  if(!ok){
+    if(dot) dot.classList.add('err');
+    toast('⚠ Could not sync — check connection');
+  }
+}
+
+/* ============================================================
+   RENDER  (unchanged from prototype engine)
+============================================================ */
+function applyAll(){
+  try{
+    const {settings,jars}=S;
+    const bP=Math.max(0,100-settings.liveP-settings.giveP);
+
+    if(g('childNameTag')) g('childNameTag').textContent=S.childName?('Jars for '+S.childName):'';
+    if(g('totalDisplay')) g('totalDisplay').textContent=fmt(jars.live.balance+jars.give.balance+jars.bel.balance);
+    if(g('splitHint')) g('splitHint').textContent=`${settings.liveP}% Fun · ${settings.giveP}% Give · ${bP}% Save`;
+
+    const liveSpent=jars.live.totalSpent||0;
+    const liveRef=Math.max(jars.live.balance+liveSpent,300);
+    if(g('liveBal')) g('liveBal').innerHTML='$'+fmt(jars.live.balance);
+    liqDual('ll','ll-spent',jars.live.balance,liveSpent,liveRef);
+    const lsLbl=g('ll-spent-lbl');
+    if(lsLbl){
+      if(liveSpent>0){lsLbl.textContent='−$'+fmt(liveSpent);lsLbl.setAttribute('opacity','0.7');}
+      else lsLbl.setAttribute('opacity','0');
+    }
+
+    const giveGiven=jars.give.totalGiven||0;
+    const giveRef=Math.max(jars.give.balance+giveGiven,300);
+    const fullyGiven=giveGiven>0&&jars.give.balance===0;
+    if(g('giveBal')) g('giveBal').innerHTML='$'+fmt(jars.give.balance);
+    liqDual('gl','gl-given',jars.give.balance,giveGiven,giveRef);
+    if(g('give-bg')) g('give-bg').setAttribute('fill',fullyGiven?'var(--given-lt)':'var(--give-lt)');
+    if(g('giveLbl')) g('giveLbl').style.color=fullyGiven?'var(--given)':'var(--give)';
+    if(g('giveBal')) g('giveBal').style.color=fullyGiven?'var(--given)':'var(--give)';
+    const ggLbl=g('gl-given-lbl'), ggCheck=g('gl-check');
+    if(ggLbl){
+      if(giveGiven>0){ggLbl.textContent='❤ $'+fmt(giveGiven);ggLbl.setAttribute('opacity','0.85');}
+      else ggLbl.setAttribute('opacity','0');
+    }
+    if(ggCheck) ggCheck.setAttribute('opacity',fullyGiven?'0.9':'0');
+    const gb=g('givenBadge');
+    if(gb){
+      if(giveGiven>0){gb.style.display='block';gb.textContent=(fullyGiven?'✓ $':'➕ $')+fmt(giveGiven)+' donated';}
+      else gb.style.display='none';
+    }
+
+    if(g('belBal')) g('belBal').innerHTML='$'+fmt(jars.bel.balance);
+    liq('bl',jars.bel.balance,Math.max(jars.bel.goal&&jars.bel.goal.amount>0?jars.bel.goal.amount:0,300));
+    const earned=jars.bel.earned||0;
+    const belGrowthEl=g('belGrowth');
+    if(belGrowthEl){
+      if(earned>0){belGrowthEl.style.display='block';belGrowthEl.textContent='+$'+fmt(earned)+' earned';}
+      else belGrowthEl.style.display='none';
+    }
+    if(openDrw==='bel') renderBelPanel();
+    if(openDrw==='give') renderCharities();
+    if(g('incomelogSec') && g('incomelogSec').style.display!=='none') renderIncomeLog();
+
+    if(g('pLiveBal')) g('pLiveBal').textContent='$'+fmt(jars.live.balance);
+    if(g('pGiveBal')) g('pGiveBal').textContent='$'+fmt(jars.give.balance);
+    if(g('pBelBal')) g('pBelBal').textContent='$'+fmt(jars.bel.balance);
+    if(g('childName')) g('childName').value=S.childName||'';
+    if(g('setLive')) g('setLive').value=settings.liveP;
+    if(g('setGive')) g('setGive').value=settings.giveP;
+    if(g('setBelDisp')) g('setBelDisp').textContent=bP+'%';
+    if(g('rateInput')) g('rateInput').value=settings.rate||5;
+    renderParentGoal();
+    renderParentActivity();
+
+  }catch(e){console.error('applyAll error:',e);}
+}
+
+function renderBelPanel(){
+  const bal=S.jars.bel.balance;
+  const earned=S.jars.bel.earned||0;
+  const rate=S.settings.rate||5;
+  const set=(id,val)=>{const e=g(id);if(e)e.textContent=val;};
+  set('invBal','$'+fmt(bal));
+  set('invRate',rate+'%');
+  set('invEarned','+$'+Math.round(earned));
+  set('invTag','↑ +$'+Math.round(bal*rate/100)+' this year (est.)');
+
+  const goal=S.jars.bel.goal;
+  const gp=g('belGoalProg'),cb=g('clearGoalBtn');
+  if(goal&&goal.amount>0){
+    if(gp)gp.style.display='block';
+    if(cb)cb.style.display='inline-flex';
+    const pct=Math.min(100,Math.round((bal/goal.amount)*100));
+    const pf=g('belProgFill');if(pf)pf.style.width=pct+'%';
+    const pp=g('belProgPct');if(pp)pp.textContent=pct+'%';
+    const pl=g('belProgLbl');if(pl)pl.textContent='$'+fmt(bal)+' / $'+fmt(goal.amount)+' ('+goal.name+')';
+  } else {
+    if(gp)gp.style.display='none';
+    if(cb)cb.style.display='none';
+  }
+}
+
+function renderCharities(){
+  const cg=g('charityGrid');
+  if(!cg)return;
+  cg.innerHTML=CHARITIES.map(c=>`
+    <button class="ch-btn${selCharity===c.id?' sel':''}" onclick="selCh('${c.id}')">
+      <div class="ch-name">${c.name}</div>
+      <div class="ch-desc">${c.desc}</div>
+    </button>`).join('');
+}
+function selCh(id){selCharity=id;renderCharities();}
+
+function renderIncomeLog(){
+  const el=g('incomeLogList');if(!el)return;
+  const log=S.incomeLog||[];
+  if(log.length===0){
+    el.innerHTML='<div class="empty-note">No entries yet. Add your first income above.</div>';
+    return;
+  }
+  el.innerHTML=log.map(function(e){
+    var d=new Date(e.date);
+    var dateStr=d.toLocaleDateString('en-US',{day:'numeric',month:'long',year:'numeric'});
+    var timeStr=d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    var icon=SOURCE_ICON[e.source]||'📝';
+    var fromStr=e.from?'<span style="color:var(--ink-muted)"> · from '+e.from+'</span>':'';
+    return '<div class="ilog-item">'+
+      '<div class="ilog-icon">'+icon+'</div>'+
+      '<div class="ilog-body">'+
+        '<div class="ilog-title"><strong>'+e.source+'</strong>'+fromStr+'</div>'+
+        '<div class="ilog-date">'+dateStr+' · '+timeStr+'</div>'+
+      '</div>'+
+      '<div class="ilog-amt">+$'+fmt(e.amount)+'</div>'+
+    '</div>';
+  }).join('');
+}
+
+function renderParentGoal(){
+  const body=g('pGoalBody'); if(!body) return;
+  const goal=S.jars.bel.goal;
+  if(goal && goal.amount>0){
+    const pct=Math.min(100,Math.round((S.jars.bel.balance/goal.amount)*100));
+    body.innerHTML='<strong>'+goal.name+'</strong> — $'+fmt(S.jars.bel.balance)+' of $'+fmt(goal.amount)+' ('+pct+'%)'+
+      '<div class="prog-track" style="margin-top:8px"><div class="prog-fill" style="width:'+pct+'%;background:var(--bel)"></div></div>';
+  } else {
+    body.textContent='No goal set yet. Your child can set one from the Save jar.';
+  }
+}
+
+function renderParentActivity(){
+  const el=g('pActivityList'); if(!el) return;
+  const all=[];
+  ['live','give','bel'].forEach(j=>{
+    (S.jars[j].history||[]).forEach(h=>all.push({...h,jar:j}));
+  });
+  all.sort((a,b)=>new Date(b.date)-new Date(a.date));
+  if(all.length===0){ el.innerHTML='<div class="empty-note">No activity yet.</div>'; return; }
+  const JAR_LBL={live:'Fun',give:'Give',bel:'Save'};
+  const JAR_ICON={income:'➕',spend:'🛍️',give:'❤',withdraw:'↓'};
+  el.innerHTML=all.slice(0,40).map(h=>{
+    const d=new Date(h.date);
+    const dateStr=d.toLocaleDateString('en-US',{day:'numeric',month:'short'})+' · '+d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    const sign = h.type==='income' ? '+' : '−';
+    const color = h.type==='income' ? 'var(--growth)' : 'var(--ink)';
+    return '<div class="ilog-item">'+
+      '<div class="ilog-icon">'+(JAR_ICON[h.type]||'•')+'</div>'+
+      '<div class="ilog-body">'+
+        '<div class="ilog-title"><strong>'+JAR_LBL[h.jar]+'</strong> · '+(h.note||h.type)+'</div>'+
+        '<div class="ilog-date">'+dateStr+'</div>'+
+      '</div>'+
+      '<div class="ilog-amt" style="color:'+color+'">'+sign+'$'+fmt(h.amount)+'</div>'+
+    '</div>';
+  }).join('');
+}
+
+/* ============================================================
+   RITUAL ANIMATION
+============================================================ */
+function playRitualAnimation(sourceEl){
+  const stage=g('ritualStage'); if(!stage||!sourceEl) return;
+  const srcRect=sourceEl.getBoundingClientRect();
+  const stageRect=stage.getBoundingClientRect();
+  const startX=srcRect.left-stageRect.left+srcRect.width/2;
+  const startY=srcRect.top-stageRect.top+srcRect.height/2;
+  ['liveCard','giveCard','belCard'].forEach((id,i)=>{
+    const target=g(id); if(!target) return;
+    const tRect=target.getBoundingClientRect();
+    const dx=(tRect.left-stageRect.left+tRect.width/2)-startX;
+    const dy=(tRect.top-stageRect.top+tRect.height/2)-startY;
+    const coin=document.createElement('div');
+    coin.className='coin';
+    coin.textContent='¢';
+    coin.style.left=startX+'px';
+    coin.style.top=startY+'px';
+    coin.style.setProperty('--dx',dx+'px');
+    coin.style.setProperty('--dy',dy+'px');
+    stage.appendChild(coin);
+    setTimeout(()=>{
+      coin.classList.add('fly');
+      setTimeout(()=>{
+        coin.remove();
+        target.classList.add('jar-bounce');
+        setTimeout(()=>target.classList.remove('jar-bounce'),500);
+      }, 1000);
+    }, i*130);
+  });
+}
+
+/* ============================================================
+   ACTIONS
+============================================================ */
+function addIncome(){
+  const input=g('incomeInput');
+  const raw=input?input.value:'';
+  const amt=Math.round(parseFloat(raw));
+  if(!amt||amt<=0||isNaN(amt)){toast('Enter a valid amount');return;}
+  const source=(g('incomeSource')?.value)||'Income';
+  const from=(g('incomeFrom')?.value.trim())||'';
+  const note=from?source+' from '+from:source;
+  const {liveP,giveP}=S.settings;
+  const lA=Math.round(amt*liveP/100);
+  const gA=Math.round(amt*giveP/100);
+  const bA=amt-lA-gA;
+  S.jars.live.balance+=lA;
+  S.jars.give.balance+=gA;
+  S.jars.bel.balance+=bA;
+  if(!S.incomeLog)S.incomeLog=[];
+  S.incomeLog.unshift({id:Date.now(),date:new Date().toISOString(),amount:amt,source,from,note});
+  S.incomeLog=S.incomeLog.slice(0,60);
+  push('live',{type:'income',amount:lA,note});
+  push('give',{type:'income',amount:gA,note});
+  push('bel', {type:'income',amount:bA,note});
+  playRitualAnimation(g('incomeBtn'));
+  input.value='';
+  clr('incomeFrom');
+  save();applyAll();
+  toast('✓ Split — Fun: $'+fmt(lA)+' · Give: $'+fmt(gA)+' · Save: $'+fmt(bA));
+}
+
+function spendLive(){
+  const amt=Math.round(parseFloat(g('liveAmt').value));
+  const note=g('liveNote').value.trim()||'Purchase';
+  if(!amt||amt<=0)return;
+  const c=Math.min(amt,S.jars.live.balance);
+  S.jars.live.balance-=c;
+  S.jars.live.totalSpent=(S.jars.live.totalSpent||0)+c;
+  push('live',{type:'spend',amount:c,note});
+  clr('liveAmt','liveNote');closeDrawer('live');save();applyAll();
+}
+
+function doGive(){
+  const amt=Math.round(parseFloat(g('giveAmt').value));
+  if(!amt||amt<=0)return;
+  const c=Math.min(amt,S.jars.give.balance);
+  const name=CHARITIES.find(ch=>ch.id===selCharity)?.name||selCharity||'charity';
+  S.jars.give.balance-=c;
+  S.jars.give.totalGiven=(S.jars.give.totalGiven||0)+c;
+  S.jars.give.lastCharity=name;
+  push('give',{type:'give',amount:c,note:name});
+  clr('giveAmt');closeDrawer('give');save();applyAll();
+  toast('❤ Donated $'+fmt(c)+' to '+name);
+}
+
+function setGoal(){
+  const name=g('belGoalName').value.trim();
+  const amt=Math.round(parseFloat(g('belGoalAmt').value));
+  if(!name||!amt||amt<=0)return;
+  S.jars.bel.goal={name,amount:amt};
+  clr('belGoalName','belGoalAmt');save();applyAll();
+  toast('✓ Goal: '+name+' — $'+fmt(amt));
+}
+function clearGoal(){S.jars.bel.goal={name:'',amount:0};save();applyAll();}
+
+function doWithdraw(){
+  const amt=Math.round(parseFloat(g('belWAmt').value));
+  const note=g('belWNote').value.trim()||'Withdrawal';
+  if(!amt||amt<=0)return;
+  const c=Math.min(amt,S.jars.bel.balance);
+  S.jars.bel.balance-=c;
+  push('bel',{type:'withdraw',amount:c,note});
+  clr('belWAmt','belWNote');closeDrawer('bel');save();applyAll();
+}
+
+function updateSettings(){
+  let l=Math.max(0,Math.min(100,parseInt(g('setLive').value)||0));
+  let gv=Math.max(0,Math.min(100,parseInt(g('setGive').value)||0));
+  if(l+gv>100)gv=100-l;
+  S.settings.liveP=l;S.settings.giveP=gv;save();applyAll();
+  toast('✓ Split percentages updated');
+}
+function updateRate(){
+  S.settings.rate=Math.max(0,Math.min(50,parseInt(g('rateInput').value)||5));
+  save();applyAll();
+}
+function updateChildName(){
+  S.childName=g('childName').value;save();applyAll();
+}
+
+function resetAll(){
+  if(!confirm('Reset all jars and history for this family? This cannot be undone.'))return;
+  S=JSON.parse(JSON.stringify(DEF));save();applyAll();
+  toast('↺ Reset');
+}
+function exportData(){
+  const b=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(b);
+  a.download='coinchest-'+(FAMILY_CODE||'data')+'.json';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  toast('✓ File exported');
+}
+
+/* ── DRAWERS ── */
+function toggleDrawer(jar){
+  if(ROLE!=='child') return;
+  const d=g(jar+'Drawer');
+  const cardId=jar==='bel'?'belCard':jar+'Card';
+  const c=g(cardId);
+  if(openDrw&&openDrw!==jar){
+    const od=g(openDrw+'Drawer');
+    const ocId=openDrw==='bel'?'belCard':openDrw+'Card';
+    if(od)od.classList.remove('open');
+    const oc=g(ocId);if(oc)oc.classList.remove('active');
+    openDrw=null;
+  }
+  if(!d)return;
+  const isOpen=d.classList.contains('open');
+  if(isOpen){d.classList.remove('open');if(c)c.classList.remove('active');openDrw=null;}
+  else{
+    d.classList.add('open');if(c)c.classList.add('active');openDrw=jar;
+    if(jar==='bel')renderBelPanel();
+    if(jar==='give')renderCharities();
+  }
+}
+function closeDrawer(jar){
+  const d=g(jar+'Drawer');if(d)d.classList.remove('open');
+  const cardId=jar==='bel'?'belCard':jar+'Card';
+  const c=g(cardId);if(c)c.classList.remove('active');
+  if(openDrw===jar)openDrw=null;
+}
+
+/* ── SECTIONS ── */
+function toggleSec(id){
+  const el=g(id+'Sec'),ch=g(id+'Chev');
+  const open=el&&el.style.display!=='none';
+  if(el)el.style.display=open?'none':'block';
+  if(ch)ch.classList.toggle('open',!open);
+  if(!open&&id==='incomelog')renderIncomeLog();
+}
+
+/* ── PARENT TABS ── */
+function showTab(name){
+  ['overview','settings','activity'].forEach(t=>{
+    g('tab-'+t).classList.toggle('active',t===name);
+    g('tabBtn-'+t).classList.toggle('active',t===name);
+  });
+}
+
+/* ── ENTER key on income ── */
+document.addEventListener('DOMContentLoaded',function(){
+  const inp=g('incomeInput');
+  if(inp) inp.addEventListener('keydown',function(e){if(e.key==='Enter')addIncome();});
+});
+
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CoinChest — A kid who feels money, a kid who understands value</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,300;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F6F1E6;--card:#FDFAF2;--ink:#1A1510;--ink-soft:#5A4E3C;--ink-muted:#9C8E78;--line:#E6DACA;--line-strong:#C8BAA4;
+  --live:#C4521E;--live-lt:#F8E4D8;--live-dk:#7A3210;
+  --give:#6B3590;--give-lt:#ECD8F8;--give-dk:#3D1A56;--given:#1D6B52;--given-lt:#C4E8DC;
+  --bel:#1A5FA8;--bel-lt:#D4E8F8;--bel-dk:#0C3563;--growth:#2D9B6A;
+  --r:18px;--rsm:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'Inter',sans-serif;background:var(--paper);color:var(--ink);line-height:1.55;overflow-x:hidden;}
+img{max-width:100%;display:block;}
+.wrap{max-width:1040px;margin:0 auto;padding:0 24px;}
+h1,h2,h3{font-family:'Fraunces',serif;font-weight:700;letter-spacing:-.02em;}
+.eyebrow{font-family:'Fraunces',serif;font-size:12px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:var(--ink-muted);}
+a{color:inherit;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:999px;font-family:'Inter',sans-serif;font-size:15px;font-weight:700;padding:14px 28px;cursor:pointer;transition:transform .15s ease,box-shadow .15s ease;text-decoration:none;}
+.btn:active{transform:scale(.97);}
+.btn-ink{background:var(--ink);color:var(--paper);box-shadow:0 6px 0 0 #000;}
+.btn-ink:hover{box-shadow:0 8px 0 0 #000;transform:translateY(-2px);}
+.btn-ghost{background:transparent;color:var(--ink);border:1.5px solid var(--ink);}
+section{padding:88px 0;}
+.section-head{text-align:center;max-width:600px;margin:0 auto 48px;}
+.section-head h2{font-size:32px;margin-top:8px;}
+.section-head p{color:var(--ink-soft);font-size:16px;margin-top:12px;}
+
+/* ---------- NAV ---------- */
+nav{position:sticky;top:0;z-index:50;background:rgba(246,241,230,.88);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;}
+.logo{font-family:'Fraunces',serif;font-weight:700;font-size:20px;display:flex;align-items:center;gap:8px;}
+.logo .dot{width:9px;height:9px;border-radius:50%;background:var(--live);box-shadow:14px 0 0 var(--give),28px 0 0 var(--bel);margin-right:24px;}
+nav .btn{padding:9px 20px;font-size:13px;}
+
+/* ---------- HERO ---------- */
+.hero{padding:64px 0 40px;text-align:center;position:relative;}
+.hero .eyebrow{display:block;margin-bottom:18px;}
+.hero h1{font-size:clamp(34px,6vw,58px);line-height:1.12;max-width:820px;margin:0 auto;}
+.hero h1 em{font-style:italic;color:var(--live);}
+.hero p.lead{max-width:520px;margin:22px auto 0;font-size:18px;color:var(--ink-soft);}
+.hero-ctas{display:flex;gap:12px;justify-content:center;margin-top:32px;flex-wrap:wrap;}
+.hero-note{margin-top:14px;font-size:13px;color:var(--ink-muted);}
+
+/* ritual stage */
+.stage{position:relative;max-width:520px;margin:64px auto 0;height:230px;}
+.token{position:absolute;top:0;left:calc(50% - 15px - 168px);width:30px;height:30px;border-radius:50%;background:var(--ink);color:var(--paper);font-family:'Fraunces',serif;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 10px rgba(0,0,0,.25);animation:tokenMove 6s ease-in-out infinite;z-index:5;}
+@keyframes tokenMove{
+  0%,6%{left:calc(50% - 15px - 168px);top:0;transform:scale(1);}
+  16%{left:calc(50% - 15px - 168px);top:64px;transform:scale(.85);}
+  20%{left:calc(50% - 15px - 168px);top:0;transform:scale(1);}
+  33%,39%{left:calc(50% - 15px);top:0;transform:scale(1);}
+  49%{left:calc(50% - 15px);top:64px;transform:scale(.85);}
+  53%{left:calc(50% - 15px);top:0;transform:scale(1);}
+  66%,72%{left:calc(50% - 15px + 168px);top:0;transform:scale(1);}
+  82%{left:calc(50% - 15px + 168px);top:64px;transform:scale(.85);}
+  86%,100%{left:calc(50% - 15px + 168px);top:0;transform:scale(1);}
+}
+.jars-row{position:absolute;bottom:0;left:0;right:0;display:flex;justify-content:space-between;padding:0 6px;}
+.stage-jar{width:132px;height:150px;background:var(--card);border:1.5px solid var(--line);border-radius:16px 16px 10px 10px;position:relative;overflow:hidden;box-shadow:0 10px 24px rgba(26,21,16,.06);}
+.stage-jar .fill{position:absolute;bottom:0;left:0;right:0;height:36%;border-radius:0 0 8px 8px;}
+.sj-live .fill{background:var(--live);animation:pulseLive 6s ease-in-out infinite;}
+.sj-give .fill{background:var(--give);animation:pulseGive 6s ease-in-out infinite;}
+.sj-bel .fill{background:var(--bel);animation:pulseBel 6s ease-in-out infinite;}
+@keyframes pulseGive{0%,16%{height:30%;}20%,30%{height:42%;}96%,100%{height:30%;}}
+@keyframes pulseBel{0%,49%{height:50%;}53%,63%{height:62%;}96%,100%{height:50%;}}
+@keyframes pulseLive{0%,82%{height:34%;}86%,96%{height:44%;}100%{height:34%;}}
+.stage-jar .lbl{position:absolute;top:12px;left:0;right:0;text-align:center;font-family:'Fraunces',serif;font-size:13px;font-weight:600;}
+.sj-live .lbl{color:var(--live-dk);} .sj-give .lbl{color:var(--give-dk);} .sj-bel .lbl{color:var(--bel-dk);}
+.stage-jar .sub{position:absolute;top:32px;left:0;right:0;text-align:center;font-size:11px;color:var(--ink-muted);}
+@media (prefers-reduced-motion:reduce){.token,.sj-live .fill,.sj-give .fill,.sj-bel .fill{animation:none;}}
+@media (max-width:640px){.stage{transform:scale(.72);margin-top:44px;}}
+
+/* ---------- WHY ---------- */
+.why{background:var(--ink);color:var(--paper);}
+.why .wrap{max-width:760px;text-align:center;}
+.why .eyebrow{color:#B9AC93;}
+.why blockquote{font-family:'Fraunces',serif;font-size:clamp(24px,4vw,34px);font-weight:500;line-height:1.35;margin:18px 0 22px;font-style:italic;}
+.why p.small{color:#C9BEA8;font-size:15px;max-width:560px;margin:0 auto;}
+
+/* ---------- JARS DETAIL ---------- */
+.jars-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+@media (max-width:800px){.jars-grid{grid-template-columns:1fr;}}
+.jar-card{border-radius:var(--r);padding:28px 24px 26px;border:1.5px solid var(--line);position:relative;overflow:hidden;background:var(--card);}
+.jar-card .big-jar{width:74px;height:88px;border-radius:14px 14px 8px 8px;position:relative;overflow:hidden;margin-bottom:16px;border:1.5px solid rgba(0,0,0,.06);}
+.jc-live .big-jar{background:var(--live-lt);} .jc-live .big-jar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:52%;background:var(--live);}
+.jc-give .big-jar{background:var(--give-lt);} .jc-give .big-jar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:38%;background:var(--give);}
+.jc-bel .big-jar{background:var(--bel-lt);} .jc-bel .big-jar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:66%;background:var(--bel);}
+.jar-card .tag{font-family:'Fraunces',serif;font-style:italic;font-size:12px;padding:3px 11px;border-radius:20px;display:inline-block;margin-bottom:10px;}
+.jc-live .tag{background:var(--live-lt);color:var(--live-dk);} .jc-give .tag{background:var(--give-lt);color:var(--give-dk);} .jc-bel .tag{background:var(--bel-lt);color:var(--bel-dk);}
+.jar-card h3{font-size:22px;margin-bottom:4px;}
+.jar-card .sub-name{color:var(--ink-muted);font-size:14px;margin-bottom:12px;}
+.jar-card p{color:var(--ink-soft);font-size:14.5px;}
+
+/* ---------- HOW IT WORKS ---------- */
+.how{background:var(--card);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;counter-reset:step;}
+@media (max-width:900px){.steps{grid-template-columns:1fr 1fr;}}
+@media (max-width:520px){.steps{grid-template-columns:1fr;}}
+.step{position:relative;padding-top:8px;}
+.step .num{font-family:'Fraunces',serif;font-size:44px;font-weight:700;color:var(--line-strong);line-height:1;margin-bottom:10px;}
+.step h4{font-size:17px;margin-bottom:6px;}
+.step p{font-size:14px;color:var(--ink-soft);}
+
+/* ---------- COMMUNITY ---------- */
+.community .wrap{display:grid;grid-template-columns:1.05fr 1fr;gap:56px;align-items:center;}
+@media (max-width:820px){.community .wrap{grid-template-columns:1fr;}}
+.feed{background:var(--card);border:1.5px solid var(--line);border-radius:var(--r);padding:8px;box-shadow:0 16px 40px rgba(26,21,16,.08);}
+.feed-item{display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid var(--line);}
+.feed-item:last-child{border-bottom:none;}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--given-lt);color:var(--given);font-family:'Fraunces',serif;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;font-size:14px;}
+.feed-txt{flex:1;font-size:13.5px;}
+.feed-txt b{font-weight:600;}
+.feed-time{font-size:11px;color:var(--ink-muted);white-space:nowrap;}
+
+/* ---------- GIFT MARKET ---------- */
+.gift{background:linear-gradient(135deg,var(--give-lt),var(--bel-lt) 70%);border-radius:28px;margin:0 24px;padding:56px 40px;}
+.gift .wrap{max-width:100%;padding:0;display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;}
+@media (max-width:800px){.gift .wrap{grid-template-columns:1fr;}.gift{padding:40px 24px;}}
+.gift h2{font-size:28px;}
+.gift p{color:var(--ink-soft);margin-top:14px;font-size:15.5px;max-width:440px;}
+.gift-card{background:var(--card);border-radius:16px;padding:22px;border:1.5px solid rgba(255,255,255,.6);box-shadow:0 14px 30px rgba(60,40,80,.1);}
+.gift-card .env{font-family:'Fraunces',serif;font-style:italic;color:var(--ink-muted);text-decoration:line-through;font-size:14px;}
+.gift-card .vs{font-size:12px;color:var(--ink-muted);margin:6px 0;}
+.gift-card .real{font-family:'Fraunces',serif;font-weight:700;font-size:19px;}
+
+/* ---------- PILOT FORM ---------- */
+.pilot{text-align:center;}
+.pilot-box{max-width:520px;margin:0 auto;background:var(--card);border:1.5px solid var(--line);border-radius:var(--r);padding:36px 30px;box-shadow:0 20px 44px rgba(26,21,16,.08);}
+.pilot-box .badge{display:inline-block;background:var(--live-lt);color:var(--live-dk);font-size:12px;font-weight:700;padding:5px 14px;border-radius:20px;margin-bottom:16px;}
+.f-row{display:flex;flex-direction:column;gap:14px;margin-top:22px;text-align:left;}
+.f-row.two{flex-direction:row;gap:10px;}
+.f-row.two > *{flex:1;}
+.field{border:1.5px solid var(--line);border-radius:var(--rsm);padding:13px 14px;font-family:'Inter',sans-serif;font-size:15px;background:#fff;color:var(--ink);outline:none;width:100%;transition:border-color .15s;}
+.field:focus{border-color:var(--ink);}
+label{font-size:12.5px;color:var(--ink-muted);margin-bottom:4px;display:block;font-weight:600;}
+.pilot-box .btn{width:100%;margin-top:6px;padding:15px;}
+.pilot-fine{font-size:12px;color:var(--ink-muted);margin-top:14px;}
+#pilotThanks{display:none;background:var(--given-lt);color:var(--given);border-radius:var(--rsm);padding:16px;font-weight:600;margin-top:18px;font-size:14px;}
+
+/* ---------- FOOTER ---------- */
+footer{background:var(--ink);color:#C9BEA8;padding:44px 0 28px;}
+footer .wrap{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;}
+footer .logo{color:var(--paper);}
+footer .logo .dot{box-shadow:14px 0 0 var(--give),28px 0 0 var(--bel);}
+footer .fine{font-size:12.5px;color:#9C8E78;}
+
+
+/* ---------- HERO CLARITY LINE ---------- */
+.hero-clarify{display:inline-block;margin-top:26px;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:7px 18px;font-size:13.5px;font-weight:600;color:var(--ink-soft);}
+
+/* ---------- WHY: three-statement list ---------- */
+.why-lead{font-family:'Fraunces',serif;font-style:italic;font-size:16px;color:#C9BEA8;margin-top:14px;}
+.why-list{max-width:360px;margin:18px auto 0;text-align:left;}
+.why-item{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.1);font-size:16px;}
+.why-item .x{color:var(--live);font-weight:700;font-size:15px;flex:none;}
+.why .why-resolve{font-size:clamp(20px,3.5vw,26px);margin:26px 0 6px;}
+
+/* ---------- HOW: clarifying note ---------- */
+.how-note{text-align:center;max-width:520px;margin:32px auto 0;font-size:14px;color:var(--ink-muted);background:var(--paper);border:1px dashed var(--line-strong);border-radius:12px;padding:12px 18px;}
+
+/* ---------- STORY ---------- */
+.story{background:var(--card);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+.story .wrap{max-width:560px;text-align:center;}
+.story h2{font-size:clamp(22px,3.6vw,28px);line-height:1.3;margin-top:8px;}
+.story-flow{margin:26px 0;display:flex;flex-direction:column;gap:10px;align-items:center;}
+.story-flow p{font-size:16px;color:var(--ink-soft);}
+.story-flow b{color:var(--ink);}
+.story-punch{font-family:'Fraunces',serif;font-style:italic;font-size:clamp(19px,3vw,23px);color:var(--growth);margin-top:6px;}
+
+/* ---------- GIFT: envelope vs CoinChest compare ---------- */
+.gift-compare{display:flex;align-items:center;justify-content:center;gap:18px;background:var(--card);border-radius:16px;padding:26px 20px;border:1.5px solid rgba(255,255,255,.6);box-shadow:0 14px 30px rgba(60,40,80,.1);}
+.compare-col{flex:1;text-align:center;}
+.compare-label{font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-muted);margin-bottom:8px;}
+.compare-emoji{font-size:34px;}
+.compare-arrow{font-size:15px;color:var(--ink-muted);margin:4px 0;}
+.compare-result{font-family:'Fraunces',serif;font-weight:700;font-size:15px;}
+.compare-bad .compare-result{color:var(--live-dk);text-decoration:line-through;text-decoration-color:var(--line-strong);}
+.compare-good .compare-result{color:var(--growth);}
+.compare-vs{font-family:'Fraunces',serif;font-style:italic;color:var(--ink-muted);font-size:14px;flex:none;}
+@media (max-width:520px){.gift-compare{flex-direction:column;gap:10px;}.compare-vs{transform:rotate(90deg);margin:2px 0;}}
+
+/* ---------- COMMUNITY: downplayed strip ---------- */
+.community-mini{padding:36px 0;}
+.community-mini .wrap{max-width:640px;}
+.community-note{text-align:center;font-size:14px;color:var(--ink-muted);background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 22px;}
+.community-note strong{color:var(--ink-soft);}
+
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="logo"><span class="dot"></span> CoinChest</div>
+    <div style="display:flex;gap:8px;">
+      <a href="app.html" class="btn btn-ghost">▶ Open the app</a>
+      <a href="#pilot" class="btn btn-ink">Join the pilot</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap">
+    <span class="eyebrow">Zion · CoinChest</span>
+    <h1>A kid who feels money,<br>a kid who understands <em>value</em>.</h1>
+    <p class="lead">Children are growing up with invisible money. CoinChest turns every allowance, birthday gift, or chore into a simple ritual that teaches saving, generosity, and smart spending — naturally.</p>
+    <div><span class="hero-clarify">Start today with the free family app — no hardware needed yet</span></div>
+    <div class="hero-ctas">
+      <a href="app.html" class="btn btn-ink">▶ Open the app</a>
+      <a href="#pilot" class="btn btn-ghost">Join the pilot</a>
+    </div>
+    <p class="hero-note">No credit card, no commitment</p>
+
+    <div class="stage" aria-hidden="true">
+      <div class="token">$</div>
+      <div class="jars-row">
+        <div class="stage-jar sj-give"><div class="lbl">GIVE</div><div class="sub">for others</div><div class="fill"></div></div>
+        <div class="stage-jar sj-bel"><div class="lbl">SAVE</div><div class="sub">the future</div><div class="fill"></div></div>
+        <div class="stage-jar sj-live"><div class="lbl">FUN</div><div class="sub">right now</div><div class="fill"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY -->
+<section class="why">
+  <div class="wrap">
+    <span class="eyebrow">Why this exists</span>
+    <p class="why-lead">Children no longer...</p>
+    <div class="why-list">
+      <div class="why-item"><span class="x">✕</span> touch money</div>
+      <div class="why-item"><span class="x">✕</span> see money grow</div>
+      <div class="why-item"><span class="x">✕</span> connect choices with consequences</div>
+    </div>
+    <blockquote class="why-resolve">CoinChest brings all three back.</blockquote>
+  </div>
+</section>
+
+<!-- THREE JARS -->
+<section id="jars">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Three jars, one philosophy</span>
+      <h2>Give · Save · Fun</h2>
+      <p>Every coin a child receives splits automatically by percentages the parent sets — and instantly gets a home of its own.</p>
+    </div>
+    <div class="jars-grid">
+      <div class="jar-card jc-give">
+        <div class="big-jar"></div>
+        <span class="tag">Give</span>
+        <h3>Give</h3>
+        <div class="sub-name">The other</div>
+        <p>Money that belongs to someone else. The child picks a cause, watches the jar fill and then get donated — and remembers: the one who gave, not just the one who bought.</p>
+      </div>
+      <div class="jar-card jc-bel">
+        <div class="big-jar"></div>
+        <span class="tag">Save</span>
+        <h3>Save</h3>
+        <div class="sub-name">The future</div>
+        <p>Money that grows over time. A goal, a progress bar, and a simulated return teach an eight-year-old what interest is — long before they can say the word.</p>
+      </div>
+      <div class="jar-card jc-live">
+        <div class="big-jar"></div>
+        <span class="tag">Fun</span>
+        <h3>Fun</h3>
+        <div class="sub-name">The present</div>
+        <p>Money it's okay to enjoy right now, guilt-free. The "in-the-moment" jar — it teaches that enjoyment is a legitimate part of managing money well.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">The ritual</span>
+      <h2>How it works</h2>
+      <p>Four simple actions — each one takes seconds.</p>
+    </div>
+    <div class="steps">
+      <div class="step"><div class="num">01</div><h4>Money comes in — any way</h4><p>Cash from grandma, allowance, a chore, a birthday check — whatever your child receives, you log the amount in seconds.</p></div>
+      <div class="step"><div class="num">02</div><h4>Automatic split</h4><p>Based on percentages set in advance (default: 10% · 10% · 80%) — the amount divides across the three jars.</p></div>
+      <div class="step"><div class="num">03</div><h4>The ritual</h4><p>The child "taps" — an animation and a sound mimic a coin physically dropping into the jar.</p></div>
+      <div class="step"><div class="num">04</div><h4>Watch it in real time</h4><p>The balance rises before their eyes. No waiting, no abstraction — the result is immediate.</p></div>
+    </div>
+    <p class="how-note">You only log what comes in — not everyday spending. It takes seconds, not bookkeeping.</p>
+  </div>
+</section>
+
+<!-- STORY -->
+<section class="story">
+  <div class="wrap">
+    <span class="eyebrow">One family's ritual</span>
+    <h2>Emma, age 8, received $20 from her grandmother.</h2>
+    <div class="story-flow">
+      <p>She tapped <b>Split</b>.</p>
+      <p>$2 went to <b style="color:var(--give-dk)">Give</b>.</p>
+      <p>$2 went to <b style="color:var(--live-dk)">Fun</b>.</p>
+      <p>$16 went toward <b style="color:var(--bel-dk)">her bicycle</b>.</p>
+    </div>
+    <p class="story-punch">Three months later, she bought the bike herself.</p>
+  </div>
+</section>
+
+<!-- GIFT MARKET -->
+<section>
+  <div class="gift">
+    <div class="wrap">
+      <div>
+        <span class="eyebrow" style="color:var(--give-dk);">The milestone gift</span>
+        <h2>An envelope isn't a gift. It's a shortcut.</h2>
+        <p>CoinChest gives something that keeps growing long after the birthday, graduation, or coming-of-age celebration ends — a values-based gift that stays in the kid's room, not in their wallet.</p>
+      </div>
+      <div class="gift-compare">
+        <div class="compare-col compare-bad">
+          <div class="compare-label">The envelope</div>
+          <div class="compare-emoji">✉️</div>
+          <div class="compare-arrow">↓</div>
+          <div class="compare-result">Gone in 3 weeks</div>
+        </div>
+        <div class="compare-vs">vs</div>
+        <div class="compare-col compare-good">
+          <div class="compare-label">CoinChest</div>
+          <div class="compare-emoji">🎁</div>
+          <div class="compare-arrow">↓</div>
+          <div class="compare-result">Lessons for years</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMMUNITY (downplayed) -->
+<section class="community-mini">
+  <div class="wrap">
+    <p class="community-note"><strong>Also inside the app:</strong> a gentle giving-community feed, so kids can see that others their age are choosing to give too — quiet, optional, and never competitive.</p>
+  </div>
+</section>
+
+<!-- PILOT FORM -->
+<section class="pilot" id="pilot">
+  <div class="wrap">
+    <div class="pilot-box">
+      <span class="badge">5–8 first spots left</span>
+      <h2 style="font-size:26px;">Want to be the first family to try it?</h2>
+      <p style="color:var(--ink-soft);margin-top:8px;font-size:14.5px;">Two weeks of free use of the WebApp version. No install, no payment, no credit card — just a link and five minutes with your child.</p>
+
+      <form class="f-row" id="pilotForm">
+        <div>
+          <label for="pName">Your name</label>
+          <input class="field" id="pName" type="text" placeholder="What's your name?" required>
+        </div>
+        <div>
+          <label for="pContact">Email</label>
+          <input class="field" id="pContact" type="email" placeholder="you@example.com" required>
+        </div>
+        <button type="submit" class="btn btn-ink">I want to join the pilot</button>
+      </form>
+      <div id="pilotThanks">Thank you! A confirmation email is being drafted for you — we'll follow up with the pilot link soon 🌱</div>
+      <p class="pilot-fine">Your details are used only to contact you about the CoinChest pilot.</p>
+      <p class="pilot-fine" style="margin-top:10px"><a href="app.html" style="color:var(--given);text-decoration:underline;font-weight:600">Already convinced? Skip the form — open the app now →</a></p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="logo"><span class="dot"></span> CoinChest</div>
+    <div class="fine">By Zion · The embodiment of wisdom · coinchest@zion — updated: 7.2.2026</div>
+  </div>
+</footer>
+
+<script>
+document.getElementById('pilotForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  var name = document.getElementById('pName').value.trim();
+  var contact = document.getElementById('pContact').value.trim();
+  if(!name || !contact) return;
+
+  var subject = encodeURIComponent('CoinChest pilot signup — ' + name);
+  var body = encodeURIComponent(
+    'Parent name: ' + name + '\n' +
+    'Email: ' + contact
+  );
+  var mailto = 'mailto:meshuz@gmail.com?subject=' + subject + '&body=' + body;
+
+  document.getElementById('pilotForm').style.display = 'none';
+  var thanks = document.getElementById('pilotThanks');
+  thanks.style.display = 'block';
+  thanks.innerHTML = 'Thanks, ' + name.split(' ')[0] + '! We\'re opening an email to complete your signup — if it doesn\'t open automatically, <a href="' + mailto + '" style="color:var(--given);text-decoration:underline;">click here</a>.';
+  window.location.href = mailto;
+});
+</script>
+</body>
+</html>
